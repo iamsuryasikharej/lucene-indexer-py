@@ -3,6 +3,8 @@ import pandas as pd
 import nltk
 import lucene
 import lucene
+import pickle
+
 lucene.initVM()
 from org.apache.lucene.analysis.core import WhitespaceAnalyzer
 
@@ -23,8 +25,9 @@ with open('./wiki_movie_plots.csv',encoding='utf-8') as f:
     
 
 def make_inverted_index(path_to_file):
+    max=0
     csv_file=pd.read_csv(path_to_file)
-    
+    doc_id=0
     for index, row in csv_file.iterrows():
         movie=row["Plot"]
         id=row["Title"]
@@ -40,14 +43,25 @@ def make_inverted_index(path_to_file):
         stemmd_tokens=[porter.stem(w) for w in lower_case_tokens]
         for token in stemmd_tokens:
             if(inverted_index.get(token)==None):
-                inverted_index[token]=[{id},1]
+                inverted_index[token]=[{str(doc_id)},1]
+                
             else:
-                inverted_index[token][0].add(str(id))
+                inverted_index[token][0].add(str(doc_id))
                 inverted_index[token][1]=inverted_index[token][1]+1
                 
-    print("processed all docs")        
-    for index in inverted_index:
-        print(index)   
+        doc_id=doc_id+1  
+        # if(max==10):
+        #     break
+        # max=max+1;  
+        
+    print(inverted_index)  
+    with open('data.pkl', 'wb') as file:
+        pickle.dump(inverted_index, file)        
+    # print("processed all docs")        
+    # for index in inverted_index:
+    #     print(index)   
+    with open('data.pkl', 'rb') as file:
+        d=pickle.load(file)  
 
 
         
@@ -81,4 +95,24 @@ def print_tokens(tokens,term_attr):
 
 
 
-make_inverted_index(path_to_file)
+# make_inverted_index(path_to_file)
+
+def loadInvertedIndex():
+    with open('data.pkl', 'rb') as file:
+        d=pickle.load(file)  
+    # print(len(d))
+    return d
+
+inverted_idx=loadInvertedIndex()
+
+
+def retriever():
+    q=input('enter keyword to search')
+    words=nltk.word_tokenize(q)
+    lower_case_tokens=[w.lower() for w in q if w.isalnum()]
+    stemmd_tokens=[porter.stem(w) for w in lower_case_tokens]
+    print(inverted_idx.get(stemmd_tokens[0]))
+    
+
+
+retriever()
