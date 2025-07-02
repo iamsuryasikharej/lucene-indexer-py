@@ -109,9 +109,29 @@ inverted_idx=loadInvertedIndex()
 def retriever():
     q=input('enter keyword to search')
     words=nltk.word_tokenize(q)
-    lower_case_tokens=[w.lower() for w in q if w.isalnum()]
+    lower_case_tokens=[w.lower() for w in words if w.isalnum()]
     stemmd_tokens=[porter.stem(w) for w in lower_case_tokens]
-    print(inverted_idx.get(stemmd_tokens[0]))
+    print(stemmd_tokens)
+    set_1=set()
+    i=0;
+    for token in stemmd_tokens:
+        # print(token,"-->",inverted_idx.get(token))
+        if(i==0):
+            # set_1.add([w for w in inverted_idx.get(token)[0] if True])
+            for w in inverted_idx.get(token)[0]:
+                set_1.add(w)
+            i=i+1;
+            
+            
+        else:
+            y=set()
+            for w in inverted_idx.get(token)[0]:
+                y.add(w)
+            set_1=set_1.intersection(y)
+    print(set_1)
+    print(len(set_1))
+
+
     
 
 
