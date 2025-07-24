@@ -30,6 +30,11 @@ def make_inverted_index_using_lucene(path_to_file):
     csv_file=pd.read_csv(path_to_file)
     
     for movie in csv_file['Plot']:
-        tokens= StandardAnalyzer().tokenStream("field", movie)
-        term_attr = tokens.addAttribute(CharTermAttribute.class_)
-        print_tokens(tokens,term_attr)
+        stream= StandardAnalyzer().tokenStream("field", StringReader(movie));
+        stream.reset()
+        while stream.incrementToken():
+            # term_attr = tokens.addAttribute(CharTermAttribute.class_)
+            tokens.append(stream.getAttribute(CharTermAttribute.class_).toString())
+            print(tokens)
+
+make_inverted_index_using_lucene("./wiki_movie_plots.csv")
